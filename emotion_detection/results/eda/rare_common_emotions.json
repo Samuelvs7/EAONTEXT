@@ -1,0 +1,143 @@
+{
+  "q25_threshold": 2465.5,
+  "q75_threshold": 2730.0,
+  "groups": {
+    "high_resource": [
+      {
+        "emotion": "surprised",
+        "count": 4310
+      },
+      {
+        "emotion": "excited",
+        "count": 3218
+      },
+      {
+        "emotion": "angry",
+        "count": 2991
+      },
+      {
+        "emotion": "proud",
+        "count": 2933
+      },
+      {
+        "emotion": "sad",
+        "count": 2883
+      },
+      {
+        "emotion": "annoyed",
+        "count": 2880
+      },
+      {
+        "emotion": "lonely",
+        "count": 2751
+      },
+      {
+        "emotion": "grateful",
+        "count": 2736
+      }
+    ],
+    "medium_resource": [
+      {
+        "emotion": "afraid",
+        "count": 2728
+      },
+      {
+        "emotion": "terrified",
+        "count": 2708
+      },
+      {
+        "emotion": "guilty",
+        "count": 2675
+      },
+      {
+        "emotion": "furious",
+        "count": 2663
+      },
+      {
+        "emotion": "disgusted",
+        "count": 2663
+      },
+      {
+        "emotion": "confident",
+        "count": 2657
+      },
+      {
+        "emotion": "anxious",
+        "count": 2651
+      },
+      {
+        "emotion": "hopeful",
+        "count": 2638
+      },
+      {
+        "emotion": "anticipating",
+        "count": 2632
+      },
+      {
+        "emotion": "impressed",
+        "count": 2630
+      },
+      {
+        "emotion": "nostalgic",
+        "count": 2595
+      },
+      {
+        "emotion": "disappointed",
+        "count": 2567
+      },
+      {
+        "emotion": "joyful",
+        "count": 2555
+      },
+      {
+        "emotion": "jealous",
+        "count": 2540
+      },
+      {
+        "emotion": "prepared",
+        "count": 2529
+      },
+      {
+        "emotion": "content",
+        "count": 2479
+      }
+    ],
+    "low_resource": [
+      {
+        "emotion": "devastated",
+        "count": 2425
+      },
+      {
+        "emotion": "embarrassed",
+        "count": 2407
+      },
+      {
+        "emotion": "sentimental",
+        "count": 2298
+      },
+      {
+        "emotion": "caring",
+        "count": 2292
+      },
+      {
+        "emotion": "trusting",
+        "count": 2270
+      },
+      {
+        "emotion": "ashamed",
+        "count": 2191
+      },
+      {
+        "emotion": "apprehensive",
+        "count": 2014
+      },
+      {
+        "emotion": "faithful",
+        "count": 1660
+      }
+    ]
+  },
+  "high_resource_count": 8,
+  "medium_resource_count": 16,
+  "low_resource_count": 8
+}

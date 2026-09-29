@@ -6,7 +6,9 @@
 *.tar.gz
 *.csv
 *.tsv
+!emotion_detection/results/**/*.csv
 data/
 emotion_detection/data/
 emotion_detection/embeddings/
 emotion_detection/.venv/
+inspect_output.txt

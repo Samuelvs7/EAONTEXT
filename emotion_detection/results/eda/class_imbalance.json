@@ -1,0 +1,10 @@
+{
+  "most_common_emotion": "surprised",
+  "most_common_count": 4310,
+  "least_common_emotion": "faithful",
+  "least_common_count": 1660,
+  "imbalance_ratio": 2.5963855421686746,
+  "mean_count": 2630.28125,
+  "std_count": 424.05897599386776,
+  "coefficient_of_variation": 0.16122191343373177
+}
