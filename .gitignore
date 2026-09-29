@@ -1,0 +1,12 @@
+﻿.venv/
+**/__pycache__/
+*.pyc
+*.npy
+*.pkl
+*.tar.gz
+*.csv
+*.tsv
+data/
+emotion_detection/data/
+emotion_detection/embeddings/
+emotion_detection/.venv/

@@ -1,0 +1,148 @@
+# ==============================================================================
+# Emotion Detection in Conversational Text using BERT and Meta-Learning Ensembles
+# Configuration File for Reproducibility
+# ==============================================================================
+
+# Random seed for reproducibility across all experiments
+random_seed: 42
+
+# Dataset configuration
+dataset:
+  name: "EmpatheticDialogues"
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  splits_dir: "data/splits"
+  train_file: "train.csv"
+  valid_file: "valid.csv"
+  test_file: "test.csv"
+  # The dataset uses comma as separator but encodes commas in text as _comma_
+  separator: ","
+  comma_token: "_comma_"
+  # Column names as found in the actual dataset
+  columns:
+    conv_id: "conv_id"
+    utterance_idx: "utterance_idx"
+    context: "context"        # This is the emotion label
+    prompt: "prompt"           # The conversation prompt/situation
+    speaker_idx: "speaker_idx"
+    utterance: "utterance"     # The actual utterance text
+    selfeval: "selfeval"
+    tags: "tags"
+
+# Preprocessing configuration
+preprocessing:
+  # Pipeline A: Classical ML
+  classical:
+    lowercase: true
+    remove_punctuation: true
+    remove_numbers: false
+    remove_stopwords: true
+    lemmatize: true
+    min_token_length: 2
+    tfidf:
+      max_features: 50000
+      ngram_range: [1, 2]
+      min_df: 2
+      max_df: 0.95
+      sublinear_tf: true
+  # Pipeline B: BERT
+  bert:
+    # Minimal cleaning - preserve emotional cues
+    replace_comma_token: true
+    strip_whitespace: true
+    # Do NOT aggressively clean for BERT
+
+# BERT configuration
+bert:
+  model_name: "bert-base-uncased"
+  max_length: 128
+  batch_size: 64          # Adjust based on GPU memory
+  cpu_batch_size: 16      # Smaller batch for CPU
+  pooling_strategy: "mean"  # mean pooling over last hidden states
+  embedding_dim: 768
+  cache_dir: "embeddings"
+  use_fp16: true          # Mixed precision for GPU
+
+# Model configurations
+models:
+  logistic_regression:
+    max_iter: 2000
+    C: 1.0
+    solver: "lbfgs"
+    multi_class: "multinomial"
+    class_weight: "balanced"
+  
+  svm:
+    C: 1.0
+    kernel: "linear"
+    probability: true
+    class_weight: "balanced"
+    max_iter: 1500
+  
+  random_forest:
+    n_estimators: 300
+    max_depth: null
+    min_samples_split: 5
+    min_samples_leaf: 2
+    class_weight: "balanced"
+    n_jobs: -1
+  
+  naive_bayes:
+    # GaussianNB for BERT embeddings, MultinomialNB for TF-IDF
+    alpha: 1.0  # For MultinomialNB
+  
+  decision_tree:
+    max_depth: 30
+    min_samples_split: 5
+    class_weight: "balanced"
+  
+  knn:
+    n_neighbors: 11
+    weights: "distance"
+    metric: "cosine"
+    n_jobs: -1
+
+# Meta-learning configuration
+meta_learning:
+  # Cross-validation folds for out-of-fold predictions
+  n_folds: 5
+  meta_learner: "logistic_regression"
+  meta_learner_params:
+    max_iter: 2000
+    C: 1.0
+    solver: "lbfgs"
+    multi_class: "multinomial"
+
+# Cross-validation configuration
+cross_validation:
+  n_folds: 5
+  shuffle: true
+
+# Rare emotion / few-shot analysis
+rare_emotion:
+  # Thresholds will be determined from actual distribution
+  # These are fallback percentile-based thresholds
+  low_resource_percentile: 25    # Bottom 25% by count
+  high_resource_percentile: 75   # Top 25% by count
+  few_shot_sizes: [100, 500, 1000]
+
+# Results directory
+results:
+  base_dir: "results"
+  eda: "results/eda"
+  baselines: "results/baselines"
+  reference_meta_learning: "results/reference_meta_learning"
+  bert: "results/bert"
+  hybrid: "results/hybrid"
+  rare_emotion: "results/rare_emotion"
+  cross_domain: "results/cross_domain"
+  error_analysis: "results/error_analysis"
+
+# Cross-domain experiment
+cross_domain:
+  emocontext_url: "https://www.emnlp2019.org/"
+  # EmoContext will be downloaded/handled separately
+  # Map EmoContext labels -> compatible format
+
+# Saved models directory
+saved_models_dir: "models"
