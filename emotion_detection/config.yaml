@@ -69,7 +69,6 @@ models:
     max_iter: 2000
     C: 1.0
     solver: "lbfgs"
-    multi_class: "multinomial"
     class_weight: "balanced"
   
   svm:
@@ -111,7 +110,6 @@ meta_learning:
     max_iter: 2000
     C: 1.0
     solver: "lbfgs"
-    multi_class: "multinomial"
 
 # Cross-validation configuration
 cross_validation:

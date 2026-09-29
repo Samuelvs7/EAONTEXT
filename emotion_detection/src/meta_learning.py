@@ -52,7 +52,6 @@ def build_reference_base_learners(config):
             max_iter=mc["logistic_regression"]["max_iter"],
             C=mc["logistic_regression"]["C"],
             solver=mc["logistic_regression"]["solver"],
-            multi_class=mc["logistic_regression"]["multi_class"],
             class_weight=mc["logistic_regression"]["class_weight"],
             random_state=seed, n_jobs=-1
         ),
@@ -146,9 +145,14 @@ def generate_out_of_fold_predictions(X_train, y_train, base_learners, n_folds,
             
             # Handle case where fold doesn't have all classes
             if probs.shape[1] < n_classes:
-                padded_probs = np.zeros((probs.shape[0], n_classes))
-                padded_probs[:, :probs.shape[1]] = probs
-                probs = padded_probs
+                padded = np.zeros((probs.shape[0], n_classes))
+                if hasattr(fold_learner, "classes_"):
+                    for ci, c in enumerate(fold_learner.classes_):
+                        if c < n_classes:
+                            padded[:, c] = probs[:, ci]
+                else:
+                    padded[:, :probs.shape[1]] = probs
+                probs = padded
             
             # Store out-of-fold predictions
             start_col = learner_idx * n_classes
@@ -194,9 +198,14 @@ def generate_test_meta_features(X_test, trained_base_learners, n_classes):
             probs[np.arange(len(preds)), preds] = 1.0
         
         if probs.shape[1] < n_classes:
-            padded_probs = np.zeros((probs.shape[0], n_classes))
-            padded_probs[:, :probs.shape[1]] = probs
-            probs = padded_probs
+            padded = np.zeros((probs.shape[0], n_classes))
+            if hasattr(learner, "classes_"):
+                for ci, c in enumerate(learner.classes_):
+                    if c < n_classes:
+                        padded[:, c] = probs[:, ci]
+            else:
+                padded[:, :probs.shape[1]] = probs
+            probs = padded
         
         start_col = learner_idx * n_classes
         end_col = start_col + n_classes
@@ -254,7 +263,6 @@ def train_reference_meta_learning(X_train, y_train, X_test, y_test,
         max_iter=meta_params["max_iter"],
         C=meta_params["C"],
         solver=meta_params["solver"],
-        multi_class=meta_params["multi_class"],
         random_state=seed,
         n_jobs=-1
     )

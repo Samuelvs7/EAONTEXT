@@ -48,7 +48,6 @@ def build_baseline_models(config):
             max_iter=mc["logistic_regression"]["max_iter"],
             C=mc["logistic_regression"]["C"],
             solver=mc["logistic_regression"]["solver"],
-            multi_class=mc["logistic_regression"]["multi_class"],
             class_weight=mc["logistic_regression"]["class_weight"],
             random_state=config["random_seed"],
             n_jobs=-1

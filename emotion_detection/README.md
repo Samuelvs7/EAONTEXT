@@ -87,25 +87,31 @@ Install the required packages:
 pip install -r requirements.txt
 ```
 
-### 2. Run Preprocessing & Classical Baselines
+### 2. Exploratory Data Analysis (EDA)
+Generates comprehensive dataset statistics, class imbalance reports, and rare/common emotion resource groupings needed by evaluation:
+```bash
+python src/eda.py
+```
+
+### 3. Run Preprocessing & Classical Baselines
 Runs Pipeline A (cleaning + TF-IDF) and trains Logistic Regression, SVM, Naive Bayes, Random Forest, and Reference Meta-Learning:
 ```bash
 python train_baselines.py
 ```
 
-### 3. Run BERT Representation Extraction & Base Classifiers
+### 4. Run BERT Representation Extraction & Base Classifiers
 Runs Pipeline B (minimal cleaning for BERT), extracts mean-pooled sentence embeddings, caches them to disk, and trains baseline classifiers on BERT features:
 ```bash
 python train_bert.py
 ```
 
-### 4. Run Proposed Hybrid Model (BERT + Meta-Learning)
+### 5. Run Proposed Hybrid Model (BERT + Meta-Learning)
 Trains base learners on BERT embeddings using out-of-fold cross-validation to construct leakage-free probability meta-features, then trains the meta learner:
 ```bash
 python train_hybrid.py
 ```
 
-### 5. Run Comprehensive Evaluation & Research Analysis
+### 6. Run Comprehensive Evaluation & Research Analysis
 Generates final model comparison table, 5-fold cross validation, rare emotion breakdown, few-shot analysis, error analysis CSV, and cross-domain validation:
 ```bash
 python evaluate.py

@@ -49,6 +49,9 @@ def run_error_analysis(texts, y_true, y_pred, y_proba, label_names,
     print(f"ERROR ANALYSIS: {model_name}")
     print(f"{'='*60}")
     
+    y_true = np.asarray(y_true)
+    y_pred = np.asarray(y_pred)
+    
     # 1. Build error DataFrame
     error_df = _build_error_dataframe(texts, y_true, y_pred, y_proba, 
                                        label_names, model_name)
@@ -98,20 +101,24 @@ def run_error_analysis(texts, y_true, y_pred, y_proba, label_names,
 
 def _build_error_dataframe(texts, y_true, y_pred, y_proba, label_names, model_name):
     """Build a DataFrame with all predictions and error indicators."""
+    y_true_arr = np.asarray(y_true)
+    y_pred_arr = np.asarray(y_pred)
+    correct_arr = (y_true_arr == y_pred_arr)
+    
     data = {
-        "text": texts,
-        "true_emotion": [label_names[y] for y in y_true],
-        "predicted_emotion": [label_names[y] for y in y_pred],
-        "true_label": y_true,
-        "predicted_label": y_pred,
-        "correct": y_true == y_pred,
+        "text": list(texts),
+        "true_emotion": [label_names[y] for y in y_true_arr],
+        "predicted_emotion": [label_names[y] for y in y_pred_arr],
+        "true_label": y_true_arr,
+        "predicted_label": y_pred_arr,
+        "correct": correct_arr,
         "model": model_name,
     }
     
     if y_proba is not None:
-        data["confidence"] = [float(y_proba[i, y_pred[i]]) for i in range(len(y_pred))]
+        data["confidence"] = [float(y_proba[i, y_pred_arr[i]]) for i in range(len(y_pred_arr))]
     else:
-        data["confidence"] = [1.0 if c else 0.0 for c in data["correct"]]
+        data["confidence"] = [1.0 if c else 0.0 for c in correct_arr]
     
     return pd.DataFrame(data)
 

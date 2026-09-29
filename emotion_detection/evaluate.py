@@ -113,9 +113,15 @@ def main():
     skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=seed)
     cv_accs, cv_macro_f1s, cv_weighted_f1s = [], [], []
     
+    lr_cfg = config.get("models", {}).get("logistic_regression", {})
     for fold, (t_idx, v_idx) in enumerate(skf.split(X_train_bert, y_train)):
-        clf = LogisticRegression(max_iter=2000, C=1.0, solver="lbfgs",
-                                  multi_class="multinomial", random_state=seed, n_jobs=-1)
+        clf = LogisticRegression(
+            max_iter=lr_cfg.get("max_iter", 2000),
+            C=lr_cfg.get("C", 1.0),
+            solver=lr_cfg.get("solver", "lbfgs"),
+            random_state=seed,
+            n_jobs=-1
+        )
         clf.fit(X_train_bert[t_idx], y_train[t_idx])
         preds = clf.predict(X_train_bert[v_idx])
         
@@ -181,8 +187,13 @@ def main():
         model_name_ea = "BERT Meta-Learning (Proposed)"
     else:
         print("  Hybrid model not found. Running error analysis on BERT + LR...")
-        clf = LogisticRegression(max_iter=2000, C=1.0, solver="lbfgs",
-                                  multi_class="multinomial", random_state=seed, n_jobs=-1)
+        clf = LogisticRegression(
+            max_iter=lr_cfg.get("max_iter", 2000),
+            C=lr_cfg.get("C", 1.0),
+            solver=lr_cfg.get("solver", "lbfgs"),
+            random_state=seed,
+            n_jobs=-1
+        )
         clf.fit(X_train_bert, y_train)
         y_pred = clf.predict(X_test_bert)
         y_proba = clf.predict_proba(X_test_bert)
@@ -198,8 +209,13 @@ def main():
     print("STEP 13: CROSS-DOMAIN VALIDATION (EmoContext)")
     print("=" * 80)
     
-    clf_cross = LogisticRegression(max_iter=2000, C=1.0, solver="lbfgs",
-                                    multi_class="multinomial", random_state=seed, n_jobs=-1)
+    clf_cross = LogisticRegression(
+        max_iter=lr_cfg.get("max_iter", 2000),
+        C=lr_cfg.get("C", 1.0),
+        solver=lr_cfg.get("solver", "lbfgs"),
+        random_state=seed,
+        n_jobs=-1
+    )
     clf_cross.fit(X_train_bert, y_train)
     in_domain_res = evaluate_model(y_test, clf_cross.predict(X_test_bert),
                                     label_names, model_name="BERT + LR")

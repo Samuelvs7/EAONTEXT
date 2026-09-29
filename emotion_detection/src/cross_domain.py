@@ -51,43 +51,31 @@ EMPATHETIC_TO_EMOCONTEXT_MAP = {
     "terrified": "others", "anxious": "others", "caring": "others",
     "guilty": "others", "ashamed": "others", "embarrassed": "others",
     "prepared": "others", "trusting": "others", "faithful": "others",
-    "confident": "others", "impressive": "others"
+    "confident": "others", "impressed": "others", "anticipating": "others"
 }
 
 
 def load_emocontext_dataset(data_path=None):
     """
-    Load EmoContext dataset if present, or generate a structured validation proxy
-    for cross-domain evaluation.
+    Load EmoContext dataset if present.
+    
+    If the dataset file is not available locally, returns (None, None).
+    Synthetic data generation is disabled to maintain scientific integrity.
     
     EmoContext has 4 emotions: happy, sad, angry, others.
     """
     if data_path and os.path.exists(data_path):
         print(f"Loading EmoContext dataset from {data_path}...")
-        df = pd.read_csv(data_path, sep="\t" if data_path.endswith(".txt") else ",")
+        df = pd.read_csv(data_path, sep="\t" if data_path.endswith(".txt") or data_path.endswith(".tsv") else ",")
         # Expected columns: turn1, turn2, turn3, label
         if "label" in df.columns:
             texts = df.apply(lambda r: f"{r.get('turn1', '')} {r.get('turn2', '')} {r.get('turn3', '')}".strip(), axis=1)
             labels = df["label"].values
             return texts.tolist(), labels.tolist()
     
-    print("  Note: Local EmoContext file not provided. Creating synthetic benchmark sample for cross-domain protocol...")
-    synthetic_data = [
-        ("I am so ecstatic and delighted to see you today!", "happy"),
-        ("I feel terrible and broken after losing my dog.", "sad"),
-        ("Get out of my sight right now, I am boiling with rage!", "angry"),
-        ("What a bizarre turn of events, I did not expect this.", "others"),
-        ("I cannot express how grateful I am for your help!", "happy"),
-        ("Feeling completely isolated and alone in this cold town.", "sad"),
-        ("Stop lying to me! You are infuriating!", "angry"),
-        ("The weather seems quite normal today.", "others"),
-        ("We won the championship and I feel so proud!", "happy"),
-        ("I feel deeply hurt by what you said yesterday.", "sad"),
-    ] * 20  # 200 samples
-    
-    texts = [item[0] for item in synthetic_data]
-    labels = [item[1] for item in synthetic_data]
-    return texts, labels
+    print("  Note: Official EmoContext dataset file not provided or not found.")
+    print("  Per research protocol, synthetic proxy benchmark is disabled to avoid unscientific metrics.")
+    return None, None
 
 
 def map_emotions_to_coarse(labels, label_map=EMPATHETIC_TO_EMOCONTEXT_MAP):
@@ -98,7 +86,9 @@ def map_emotions_to_coarse(labels, label_map=EMPATHETIC_TO_EMOCONTEXT_MAP):
 def run_cross_domain_evaluation(model, extractor_or_vectorizer, label_encoder, 
                                 in_domain_results, config,
                                 save_dir="results/cross_domain",
-                                is_bert=True):
+                                is_bert=True,
+                                base_learners=None,
+                                data_path=None):
     """
     Evaluate in-domain trained model on cross-domain EmoContext test set.
     
@@ -110,6 +100,8 @@ def run_cross_domain_evaluation(model, extractor_or_vectorizer, label_encoder,
         config: config dict
         save_dir: output directory
         is_bert: bool indicating whether feature extractor is BERT
+        base_learners: optional dict of base learners if model is a stacking meta-learner
+        data_path: path to EmoContext dataset file
     """
     os.makedirs(save_dir, exist_ok=True)
     
@@ -118,7 +110,20 @@ def run_cross_domain_evaluation(model, extractor_or_vectorizer, label_encoder,
     print(f"{'='*60}")
     
     # 1. Load EmoContext dataset
-    texts, true_coarse_labels = load_emocontext_dataset()
+    if data_path is None and config is not None:
+        data_path = config.get("cross_domain", {}).get("emocontext_data_path", None)
+    
+    texts, true_coarse_labels = load_emocontext_dataset(data_path)
+    if texts is None or true_coarse_labels is None:
+        print("  ✓ Cross-domain evaluation skipped: Official EmoContext dataset not provided.")
+        print("    (Synthetic benchmark disabled to maintain scientific integrity.)")
+        skip_report = {
+            "status": "SKIPPED",
+            "reason": "Official EmoContext dataset not found. Synthetic benchmark generation disabled to preserve scientific validity."
+        }
+        with open(os.path.join(save_dir, "cross_domain_status.json"), "w") as f:
+            json.dump(skip_report, f, indent=2)
+        return None
     
     # 2. Extract features
     if is_bert:
@@ -126,8 +131,18 @@ def run_cross_domain_evaluation(model, extractor_or_vectorizer, label_encoder,
     else:
         X_cross = extractor_or_vectorizer.transform(texts)
     
-    # 3. Predict fine-grained emotions
-    y_pred_encoded = model.predict(X_cross)
+    # 3. Predict fine-grained emotions matching model's expected feature interface
+    if base_learners is not None:
+        n_classes = len(label_encoder.classes_)
+        if is_bert:
+            from src.hybrid_model import generate_hybrid_test_meta_features
+            X_input = generate_hybrid_test_meta_features(X_cross, base_learners, n_classes)
+        else:
+            from src.meta_learning import generate_test_meta_features
+            X_input = generate_test_meta_features(X_cross, base_learners, n_classes)
+        y_pred_encoded = model.predict(X_input)
+    else:
+        y_pred_encoded = model.predict(X_cross)
     pred_fine_labels = label_encoder.inverse_transform(y_pred_encoded)
     
     # 4. Map predictions to coarse EmoContext labels

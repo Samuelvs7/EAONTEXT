@@ -166,11 +166,15 @@ def run_few_shot_experiment(X_train, y_train, X_test, y_test,
             y_sub = y_train[indices]
             actual_size = len(indices)
         
-        # Train logistic regression (fast and representative)
+        # Train logistic regression using config parameters
+        lr_cfg = config.get("models", {}).get("logistic_regression", {})
         model = LogisticRegression(
-            max_iter=2000, C=1.0, solver="lbfgs",
-            multi_class="multinomial", class_weight="balanced",
-            random_state=seed, n_jobs=-1
+            max_iter=lr_cfg.get("max_iter", 2000),
+            C=lr_cfg.get("C", 1.0),
+            solver=lr_cfg.get("solver", "lbfgs"),
+            class_weight=lr_cfg.get("class_weight", "balanced"),
+            random_state=seed,
+            n_jobs=-1
         )
         model.fit(X_sub, y_sub)
         y_pred = model.predict(X_test)

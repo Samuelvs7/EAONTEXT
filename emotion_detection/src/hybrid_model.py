@@ -68,7 +68,6 @@ def build_hybrid_base_learners(config):
             max_iter=mc["logistic_regression"]["max_iter"],
             C=mc["logistic_regression"]["C"],
             solver=mc["logistic_regression"]["solver"],
-            multi_class=mc["logistic_regression"]["multi_class"],
             class_weight=mc["logistic_regression"]["class_weight"],
             random_state=seed, n_jobs=-1
         ),
@@ -266,7 +265,6 @@ def train_hybrid_model(X_train, y_train, X_test, y_test,
         max_iter=meta_params["max_iter"],
         C=meta_params["C"],
         solver=meta_params["solver"],
-        multi_class=meta_params["multi_class"],
         random_state=seed,
         n_jobs=-1
     )
@@ -349,7 +347,6 @@ def train_bert_base_classifiers(X_train, y_train, X_test, y_test,
             max_iter=mc["logistic_regression"]["max_iter"],
             C=mc["logistic_regression"]["C"],
             solver=mc["logistic_regression"]["solver"],
-            multi_class=mc["logistic_regression"]["multi_class"],
             class_weight=mc["logistic_regression"]["class_weight"],
             random_state=seed, n_jobs=-1
         ),
